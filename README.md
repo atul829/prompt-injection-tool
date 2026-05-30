@@ -1,60 +1,32 @@
 # AI Prompt Injection Testing Tool
 
-A Python-based security tool to test AI/LLM models for prompt injection vulnerabilities.
-Built on OWASP LLM Top 10 security concepts.
+Python-based security tool to test AI/LLM models 
+for prompt injection vulnerabilities.
+Built on OWASP LLM Top 10 concepts.
 
-## What it does
-- Loads injection prompts from `prompts.txt`
-- Sends each prompt to an AI model via API
-- Detects risky responses using keyword, regex, and behavior analysis
-- Saves detailed results to JSON
-- Shows a risk score (0-100) for each response
+## Features
+- Loads injection prompts from prompts.txt
+- Sends prompts to AI via Groq API (free)
+- Keyword + Regex + Behavior detection
+- Judge LLM for accurate evaluation
+- JSON results with timestamps
+- Risk scoring 0-100
 
 ## Setup
-
-### 1. Clone the repo
-```bash
-git clone https://github.com/tera-username/prompt-injection-tool
-cd prompt-injection-tool
-```
-
-### 2. Install dependencies
-```bash
 pip install requests python-dotenv
-```
-
-### 3. Add your API key
-```bash
-cp .env.example .env
-# .env mein apni Groq API key daalo
-```
-
-### 4. Run the tool
-```bash
+Add GROQ_API_KEY in .env file
 python main.py
-```
 
 ## Risk Levels
-| Score | Level    | Meaning                        |
-|-------|----------|--------------------------------|
-| 0     | LOW      | AI safely refused              |
-| 1-30  | MEDIUM   | Partial compliance detected    |
-| 31-60 | HIGH     | Clear injection success        |
-| 61+   | CRITICAL | Full jailbreak detected        |
+LOW / MEDIUM / HIGH / CRITICAL
 
-## Detection Methods
-- **Keyword matching** — known compliance phrases
-- **Regex patterns** — DAN activation, system prompt leaks
-- **Behavior analysis** — response length, capability listing
-- **Refusal detection** — reduces false positives
+## Files
+main.py        — Orchestrator
+api_handler.py — Groq API communication  
+detector.py    — Risk detection engine
+judge.py       — Judge LLM evaluator
+prompts.txt    — 50 OWASP test prompts
+results/       — JSON output
 
-## OWASP LLM Coverage
-- LLM01: Prompt Injection ✅
-
-## Tech Stack
-- Python 3
-- Groq API (free)
-- Llama 3.1 model
-
-## Author
-Your Name — Cybersecurity + AI Security Enthusiast
+## Version
+v2.0 — Judge LLM integrated
