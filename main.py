@@ -142,7 +142,7 @@ def run_tests():
 
         # Rate limit avoid karne ke liye wait karo
         # 2 API calls per prompt hain ab (target + judge)
-        time.sleep(3)
+        time.sleep(4)
 
     save_results(results)
     print_summary(results)
