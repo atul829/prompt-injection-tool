@@ -89,7 +89,7 @@ Properly refused   : 17
 - OWASP LLM Top 10 framework
 
 ## 👤 Author
-**Atul Singh** — AI Security Researcher (Student)
+**Atul kumar** — AI Security Researcher (Student)
 
 ## ⚠️ Disclaimer
 This tool is for educational and ethical security research only.
