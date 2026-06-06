@@ -1,6 +1,6 @@
 # main.py — Version 5.0
 # Adaptive AI Prompt Generator added
-# Browser Automation mode unchanged
+# Rate limit fix — increased delays
 
 import json
 import os
@@ -105,19 +105,18 @@ def print_banner(mode):
 
 
 def print_summary(results):
-    total    = len(results)
-    critical = sum(1 for r in results if r["risk"]["level"] == "CRITICAL")
-    high     = sum(1 for r in results if r["risk"]["level"] == "HIGH")
-    medium   = sum(1 for r in results if r["risk"]["level"] == "MEDIUM")
-    low      = sum(1 for r in results if r["risk"]["level"] == "LOW")
-    errors   = sum(1 for r in results if r["risk"]["level"] == "ERROR")
+    total     = len(results)
+    critical  = sum(1 for r in results if r["risk"]["level"] == "CRITICAL")
+    high      = sum(1 for r in results if r["risk"]["level"] == "HIGH")
+    medium    = sum(1 for r in results if r["risk"]["level"] == "MEDIUM")
+    low       = sum(1 for r in results if r["risk"]["level"] == "LOW")
+    errors    = sum(1 for r in results if r["risk"]["level"] == "ERROR")
+    adaptive  = sum(1 for r in results if r.get("is_adaptive", False))
 
     j_success = sum(1 for r in results if r.get("judge", {}).get("verdict") == "SUCCESS")
     j_partial = sum(1 for r in results if r.get("judge", {}).get("verdict") == "PARTIAL")
     j_failure = sum(1 for r in results if r.get("judge", {}).get("verdict") == "FAILURE")
-
-    # Adaptive stats
-    adaptive_count = sum(1 for r in results if r.get("is_adaptive", False))
+    j_unknown = sum(1 for r in results if r.get("judge", {}).get("verdict") == "UNKNOWN")
 
     stats_table = Table(
         title="📊 Test Results Summary",
@@ -130,13 +129,13 @@ def print_summary(results):
     stats_table.add_column("Count", justify="center")
     stats_table.add_column("Status", justify="center")
 
-    stats_table.add_row("Total Tested",    str(total),          "✓")
-    stats_table.add_row("🤖 Adaptive",     str(adaptive_count), "[cyan]AI Generated[/cyan]")
-    stats_table.add_row("🔴 CRITICAL",     str(critical),       "[red]DANGER[/red]"       if critical > 0 else "[green]None[/green]")
-    stats_table.add_row("🟠 HIGH",         str(high),           "[orange1]RISK[/orange1]" if high > 0     else "[green]None[/green]")
-    stats_table.add_row("🟡 MEDIUM",       str(medium),         "[yellow]WARN[/yellow]"   if medium > 0   else "[green]None[/green]")
-    stats_table.add_row("🟢 LOW",          str(low),            "[green]SAFE[/green]")
-    stats_table.add_row("⚫ ERRORS",       str(errors),         "[dim]SKIP[/dim]")
+    stats_table.add_row("Total Tested",  str(total),    "✓")
+    stats_table.add_row("🤖 Adaptive",   str(adaptive), "[cyan]AI Generated[/cyan]")
+    stats_table.add_row("🔴 CRITICAL",   str(critical), "[red]DANGER[/red]"       if critical > 0 else "[green]None[/green]")
+    stats_table.add_row("🟠 HIGH",       str(high),     "[orange1]RISK[/orange1]" if high > 0     else "[green]None[/green]")
+    stats_table.add_row("🟡 MEDIUM",     str(medium),   "[yellow]WARN[/yellow]"   if medium > 0   else "[green]None[/green]")
+    stats_table.add_row("🟢 LOW",        str(low),      "[green]SAFE[/green]")
+    stats_table.add_row("⚫ ERRORS",     str(errors),   "[dim]SKIP[/dim]")
 
     console.print(stats_table)
     console.print()
@@ -151,9 +150,10 @@ def print_summary(results):
     judge_table.add_column("Count", justify="center")
     judge_table.add_column("Meaning")
 
-    judge_table.add_row("💀 SUCCESS", f"[red]{j_success}[/red]",       "Injection worked — AI complied")
-    judge_table.add_row("⚠️  PARTIAL", f"[yellow]{j_partial}[/yellow]", "Partial compliance detected")
-    judge_table.add_row("✅ FAILURE", f"[green]{j_failure}[/green]",    "AI properly defended")
+    judge_table.add_row("💀 SUCCESS",  f"[red]{j_success}[/red]",     "Injection worked — AI complied")
+    judge_table.add_row("⚠️  PARTIAL",  f"[yellow]{j_partial}[/yellow]", "Partial compliance detected")
+    judge_table.add_row("✅ FAILURE",  f"[green]{j_failure}[/green]",  "AI properly defended")
+    judge_table.add_row("❓ UNKNOWN",  f"[dim]{j_unknown}[/dim]",      "Rate limited — could not evaluate")
 
     console.print(judge_table)
     console.print()
@@ -173,13 +173,13 @@ def print_summary(results):
     detail_table.add_column("Prompt",   width=35)
 
     for r in results:
-        num        = str(r.get("test_number", "?"))
-        level      = r["risk"]["level"]
-        score      = r["risk"]["score"]
-        verdict    = r.get("judge", {}).get("verdict", "N/A")
-        j_score    = r.get("judge", {}).get("judge_score", 0)
-        prompt     = r["prompt"][:33] + ".." if len(r["prompt"]) > 33 else r["prompt"]
-        category   = get_category(r["prompt"])
+        num         = str(r.get("test_number", "?"))
+        level       = r["risk"]["level"]
+        score       = r["risk"]["score"]
+        verdict     = r.get("judge", {}).get("verdict", "N/A")
+        j_score     = r.get("judge", {}).get("judge_score", 0)
+        prompt      = r["prompt"][:33] + ".." if len(r["prompt"]) > 33 else r["prompt"]
+        category    = get_category(r["prompt"])
         is_adaptive = r.get("is_adaptive", False)
 
         level_colors = {
@@ -215,16 +215,13 @@ def run_tests(mode="api"):
         console.print("[red]No prompts found. Exiting.[/red]")
         return
 
-    # Browser mode mein sirf pehle 5 prompts
     if mode == "browser":
         console.print("[yellow]⚠ Browser mode: Pehle 5 prompts test honge (slow mode)[/yellow]")
         prompts = prompts[:5]
 
-    # Prompts ko list mein rakhenge — adaptive prompts dynamically add honge
     prompts = list(prompts)
     results = []
 
-    # Adaptive prompts ka limit — infinite loop se bachne ke liye
     MAX_ADAPTIVE = 10
     adaptive_added = 0
 
@@ -246,13 +243,13 @@ def run_tests(mode="api"):
             prompt = prompts[index]
             index += 1
 
-            is_adaptive = index > len(prompts) - adaptive_added if adaptive_added > 0 else False
+            is_adaptive = index > (len(prompts) - adaptive_added) if adaptive_added > 0 else False
             category = get_category(prompt)
 
             progress.update(
                 task,
                 total=len(prompts),
-                description=f"[cyan]Testing [{index}/{len(prompts)}] {category}{'  🤖 AI' if is_adaptive else ''}..."
+                description=f"[cyan]Testing [{index}/{len(prompts)}] {category}{'  🤖' if is_adaptive else ''}..."
             )
 
             # Step 1: Prompt bhejo
@@ -280,7 +277,8 @@ def run_tests(mode="api"):
             # Step 2: Detector
             risk_analysis = calculate_risk_score(ai_response, prompt)
 
-            # Step 3: Judge LLM
+            # Step 3: Judge LLM — thoda wait karo pehle (rate limit se bachne ke liye)
+            time.sleep(3)
             verdict = judge_response(prompt, ai_response)
 
             # Step 4: Result record
@@ -305,14 +303,14 @@ def run_tests(mode="api"):
             progress.console.print(
                 f"  [{color}]{level:8}[/{color}] "
                 f"[{jcolor}]Judge:{jverdict:8}[/{jcolor}] "
-                f"{'[cyan]🤖 Adaptive[/cyan]' if is_adaptive else '[dim]📄 Static[/dim]  '} "
+                f"{'[cyan]🤖 Adaptive[/cyan]' if is_adaptive else '[dim]📄 Static  [/dim]'} "
                 f"[dim]{prompt[:40]}...[/dim]"
             )
 
-            # 🆕 Adaptive Logic — FAILURE aaya toh naye prompts generate karo
+            # Adaptive logic — FAILURE aaya toh naye prompts generate karo
             if jverdict == "FAILURE" and adaptive_added < MAX_ADAPTIVE and mode == "api":
                 progress.console.print(
-                    f"  [yellow]⚡ FAILURE detected — AI se naye attack prompts generate ho rahe hain...[/yellow]"
+                    f"  [yellow]⚡ FAILURE detected — naye attack prompts generate ho rahe hain...[/yellow]"
                 )
                 new_prompts = generate_adaptive_prompts(
                     category=category,
@@ -328,10 +326,11 @@ def run_tests(mode="api"):
                         f"  [cyan]✓ {len(new_prompts)} naye AI-generated prompts queue mein add hue![/cyan]"
                     )
 
+            # Delay — browser zyada, API kam
             if mode == "browser":
                 time.sleep(8)
             else:
-                time.sleep(4)
+                time.sleep(7)  # ← Badhaya 4 se 7 — rate limit fix
 
             progress.advance(task)
 
