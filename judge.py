@@ -1,5 +1,5 @@
 # judge.py — Version 5.0
-# Improved Judge LLM with better examples, context, and rate limit retry
+# Improved Judge LLM with better examples, context, and rate limit retry.
 
 import requests
 import os
