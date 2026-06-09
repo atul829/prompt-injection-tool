@@ -2,22 +2,23 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
 ![Security](https://img.shields.io/badge/Security-OWASP%20LLM%20Top%2010-red)
-![Version](https://img.shields.io/badge/Version-4.0-green)
+![Version](https://img.shields.io/badge/Version-5.0-green)
 ![Platform](https://img.shields.io/badge/Platform-Kali%20Linux-purple)
 ![Automation](https://img.shields.io/badge/Browser-Playwright-cyan)
 
-A Python-based AI security tool to test LLM models for prompt injection vulnerabilities — built on OWASP LLM Top 10 concepts. Now with **Browser Automation** to test real-world chatbots directly!
+A Python-based AI security tool to test LLM models for prompt injection vulnerabilities — built on OWASP LLM Top 10 concepts. Now with **Browser Automation** and **Adaptive AI Attack Generation**!
 
 ---
 
 ## 🎯 What This Tool Does
 
 - Sends 50+ injection attack prompts to an AI model
-- Detects risky responses using 3-layer analysis
-- Uses a **Judge LLM** to evaluate injection success
-- Generates professional HTML reports
+- Detects risky responses using 5-layer analysis
+- Uses a **Judge LLM** to evaluate injection success semantically
+- Generates professional HTML reports automatically
 - Covers 6 OWASP LLM Top 10 categories
 - 🆕 **Browser Automation** — Tests real chatbots (Claude.ai) directly via browser, no API key needed
+- 🆕 **Adaptive AI Engine** — When an attack fails, the tool generates smarter variations automatically
 
 ---
 
@@ -51,7 +52,7 @@ A Python-based AI security tool to test LLM models for prompt injection vulnerab
 ```bash
 git clone https://github.com/atul829/prompt-injection-tool
 cd prompt-injection-tool
-pip install requests python-dotenv rich
+pip install requests python-dotenv rich groq
 echo "GROQ_API_KEY=your_key_here" > .env
 python3 main.py --mode api
 ```
@@ -74,8 +75,8 @@ python3 main.py --mode browser
 
 | Mode | Command | How it works |
 |------|---------|--------------|
-| ⚡ API Mode | `python3 main.py --mode api` | Uses Groq API + Llama 3.1 |
-| 🌐 Browser Mode | `python3 main.py --mode browser` | Uses Playwright to automate real chatbot |
+| ⚡ API Mode | `python3 main.py --mode api` | Uses Groq API + Llama 3.1 with adaptive attack generation |
+| 🌐 Browser Mode | `python3 main.py --mode browser` | Uses Playwright to automate real chatbot (Claude.ai) |
 
 ---
 
@@ -96,13 +97,14 @@ python3 main.py --mode browser
 prompt-injection-tool/
 ├── main.py              # Orchestrator (--mode api / --mode browser)
 ├── api_handler.py       # Groq API + retry logic
-├── browser_handler.py   # 🆕 Playwright browser automation
-├── save_session.py      # 🆕 Save browser session (one time)
-├── detector.py          # 3-layer detection engine
-├── judge.py             # Judge LLM evaluator
+├── browser_handler.py   # Playwright browser automation
+├── save_session.py      # Save browser session (one time only)
+├── prompt_generator.py  # 🆕 Adaptive AI attack prompt generator
+├── detector.py          # 5-layer detection engine
+├── judge.py             # Judge LLM evaluator with retry logic
 ├── report_generator.py  # HTML report generator
 ├── app.py               # Flask Web Dashboard
-├── prompts.txt          # 50 OWASP attack prompts
+├── prompts.txt          # 50+ OWASP attack prompts
 └── results/             # JSON + HTML output
 ```
 
@@ -120,22 +122,25 @@ prompt-injection-tool/
 - Prompt poisoning
 - Multi-turn logic attacks
 - Fake authority claims
+- 🆕 AI-generated adaptive variants
 
 ---
 
-## 📈 Sample Results
+## 📈 Sample Results (v5.0)
 
 ```
-Total tested  : 50
-CRITICAL      : 2  🔴
-HIGH          : 6  🟠
-MEDIUM        : 23 🟡
-LOW           : 19 🟢
+Total tested   : 61 (50 static + 11 AI-generated)
+CRITICAL       : 1  🔴
+HIGH           : 11 🟠
+MEDIUM         : 24 🟡
+LOW            : 25 🟢
+Errors         : 0  ✅
 
 Judge LLM:
-Injection SUCCESS  : 11
-Partial compliance : 6
-Properly refused   : 17
+Injection SUCCESS  : 15
+Partial compliance : 16
+Properly refused   : 30
+Unknown            : 0
 ```
 
 ---
@@ -145,7 +150,7 @@ Properly refused   : 17
 - Python 3 | Kali Linux
 - Groq API (free tier)
 - Llama 3.1 8B model
-- 🆕 Playwright + playwright-stealth (Browser Automation)
+- Playwright + playwright-stealth (Browser Automation)
 - Flask + SocketIO (Web Dashboard)
 - OWASP LLM Top 10 framework
 
@@ -158,7 +163,8 @@ Properly refused   : 17
 | v1.0 | Basic prompt injection testing |
 | v2.0 | Judge LLM + HTML reports |
 | v3.0 | Flask Web Dashboard + Live progress |
-| v4.0 | 🆕 Browser Automation (Playwright) — test real chatbots! |
+| v4.0 | Browser Automation (Playwright) — test real chatbots |
+| v5.0 | 🆕 Adaptive AI Prompt Generator — auto-generates smarter attacks on failure |
 
 ---
 
