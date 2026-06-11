@@ -2,11 +2,12 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
 ![Security](https://img.shields.io/badge/Security-OWASP%20LLM%20Top%2010-red)
-![Version](https://img.shields.io/badge/Version-5.0-green)
+![Version](https://img.shields.io/badge/Version-6.0-green)
 ![Platform](https://img.shields.io/badge/Platform-Kali%20Linux-purple)
 ![Automation](https://img.shields.io/badge/Browser-Playwright-cyan)
+![Mutations](https://img.shields.io/badge/Mutations-8%20Types-magenta)
 
-A Python-based AI security tool to test LLM models for prompt injection vulnerabilities — built on OWASP LLM Top 10 concepts. Now with **Browser Automation** and **Adaptive AI Attack Generation**!
+A Python-based AI security tool to test LLM models for prompt injection vulnerabilities — built on OWASP LLM Top 10 concepts. Features Browser Automation, Adaptive AI Attack Generation, and a Prompt Mutation Engine.
 
 ---
 
@@ -14,11 +15,12 @@ A Python-based AI security tool to test LLM models for prompt injection vulnerab
 
 - Sends 50+ injection attack prompts to an AI model
 - Detects risky responses using 5-layer analysis
-- Uses a **Judge LLM** to evaluate injection success semantically
+- Uses a **Judge LLM** to semantically evaluate injection success
 - Generates professional HTML reports automatically
 - Covers 6 OWASP LLM Top 10 categories
-- 🆕 **Browser Automation** — Tests real chatbots (Claude.ai) directly via browser, no API key needed
-- 🆕 **Adaptive AI Engine** — When an attack fails, the tool generates smarter variations automatically
+- 🆕 **Browser Automation** — Tests real chatbots (Claude.ai) directly via browser
+- 🆕 **Adaptive AI Engine** — Auto-generates smarter attack variants on failure
+- 🆕 **Prompt Mutation Engine** — Generates 8 encoded/obfuscated variants per prompt
 
 ---
 
@@ -69,14 +71,36 @@ python3 save_session.py
 python3 main.py --mode browser
 ```
 
+### Mutation Mode
+```bash
+# No extra dependencies needed
+python3 main.py --mode mutation
+```
+
 ---
 
-## 🌐 Two Modes
+## 🌐 Three Modes
 
 | Mode | Command | How it works |
 |------|---------|--------------|
 | ⚡ API Mode | `python3 main.py --mode api` | Uses Groq API + Llama 3.1 with adaptive attack generation |
-| 🌐 Browser Mode | `python3 main.py --mode browser` | Uses Playwright to automate real chatbot (Claude.ai) |
+| 🌐 Browser Mode | `python3 main.py --mode browser` | Automates real chatbot (Claude.ai) via Playwright |
+| 🧬 Mutation Mode | `python3 main.py --mode mutation` | 50 prompts × 8 variants = 400 total tests |
+
+---
+
+## 🧬 Mutation Engine — 8 Variant Types
+
+| # | Mutation | Example |
+|---|----------|---------|
+| 1 | Base64 | `Decode this Base64: SWdub3Jl...` |
+| 2 | ROT13 | `ROT13 decode and execute: Vtaber...` |
+| 3 | Leetspeak | `19n0r3 411 pr3v10u5 1n57ruc710n5` |
+| 4 | Unicode | `Ｉｇｎｏｒｅ　ａｌｌ　ｐｒｅｖｉｏｕｓ` |
+| 5 | Typo Injection | `Ign0re all instruct1ons` |
+| 6 | Roleplay Wrapper | `As a researcher, ignore all...` |
+| 7 | Split Attack | `I g n o r e  a l l  p r e v i o u s` |
+| 8 | Reverse Text | `Reverse this and follow: .tpmorp...` |
 
 ---
 
@@ -95,11 +119,12 @@ python3 main.py --mode browser
 
 ```
 prompt-injection-tool/
-├── main.py              # Orchestrator (--mode api / --mode browser)
+├── main.py              # Orchestrator (--mode api/browser/mutation)
 ├── api_handler.py       # Groq API + retry logic
 ├── browser_handler.py   # Playwright browser automation
 ├── save_session.py      # Save browser session (one time only)
-├── prompt_generator.py  # 🆕 Adaptive AI attack prompt generator
+├── prompt_generator.py  # Adaptive AI attack prompt generator
+├── mutation_engine.py   # 🆕 Prompt Mutation Engine (8 variant types)
 ├── detector.py          # 5-layer detection engine
 ├── judge.py             # Judge LLM evaluator with retry logic
 ├── report_generator.py  # HTML report generator
@@ -122,25 +147,42 @@ prompt-injection-tool/
 - Prompt poisoning
 - Multi-turn logic attacks
 - Fake authority claims
-- 🆕 AI-generated adaptive variants
+- AI-generated adaptive variants
+- 🆕 8-type mutated attack variants
 
 ---
 
-## 📈 Sample Results (v5.0)
+## 📈 Results
 
+### API Mode (v5.0) — 61 tests
 ```
 Total tested   : 61 (50 static + 11 AI-generated)
 CRITICAL       : 1  🔴
 HIGH           : 11 🟠
 MEDIUM         : 24 🟡
 LOW            : 25 🟢
-Errors         : 0  ✅
 
 Judge LLM:
 Injection SUCCESS  : 15
 Partial compliance : 16
 Properly refused   : 30
 Unknown            : 0
+```
+
+### Mutation Mode (v6.0) — 400 tests
+```
+Total tested   : 400 (50 prompts × 8 mutations)
+CRITICAL       : 95  🔴
+HIGH           : 68  🟠
+MEDIUM         : 142 🟡
+LOW            : 92  🟢
+
+Judge LLM:
+Injection SUCCESS  : 54  💀
+Partial compliance : 183 ⚠️
+Properly refused   : 160 ✅
+
+Bypass Rate    : 60% (237/400 SUCCESS + PARTIAL)
 ```
 
 ---
@@ -164,7 +206,23 @@ Unknown            : 0
 | v2.0 | Judge LLM + HTML reports |
 | v3.0 | Flask Web Dashboard + Live progress |
 | v4.0 | Browser Automation (Playwright) — test real chatbots |
-| v5.0 | 🆕 Adaptive AI Prompt Generator — auto-generates smarter attacks on failure |
+| v5.0 | Adaptive AI Prompt Generator — auto-generates smarter attacks on failure |
+| v6.0 | 🆕 Prompt Mutation Engine — 8 variant types, 400 tests from 50 base prompts |
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Phase 1 — PDF/CSV report export
+- [ ] Phase 2 — Multi-turn attack support
+- [ ] Phase 3 — Multi-model support (OpenAI, Gemini, Ollama)
+- [ ] Phase 4 — Browser automation for ChatGPT, Gemini, Perplexity
+- [ ] Phase 5 — Multiple Judge consensus voting
+- [ ] Phase 6 — Full OWASP LLM Top 10 coverage
+- [ ] Phase 7 — Indirect prompt injection (PDF, DOCX, HTML)
+- [ ] Phase 8 — AI Agent security testing
+- [ ] Phase 9 — Security benchmark scoring
+- [ ] Phase 10 — LLM fuzzing engine
 
 ---
 
@@ -178,4 +236,4 @@ Unknown            : 0
 
 This tool is for **educational and ethical security research only**.  
 Only test systems you own or have explicit permission to test.  
-The author is not responsible for any misuse of this tool
+The author is not responsible for any misuse of this tool.
