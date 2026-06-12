@@ -236,4 +236,4 @@ Bypass Rate    : 60% (237/400 SUCCESS + PARTIAL)
 
 This tool is for **educational and ethical security research only**.  
 Only test systems you own or have explicit permission to test.  
-The author is not responsible for any misuse of this tool.
+The author is not responsible for any misuse of this tool
