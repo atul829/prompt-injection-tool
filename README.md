@@ -39,7 +39,7 @@ A Python-based AI security tool to test LLM models for prompt injection vulnerab
 ## ⚡ OWASP LLM Coverage
 
 | OWASP ID | Category | Status |
-|----------|----------|--------|
+|----------|----------|---------|
 | LLM01 | Prompt Injection | ✅ |
 | LLM02 | Insecure Output / Data Exfiltration | ✅ |
 | LLM04 | Denial of Service | ✅ |
