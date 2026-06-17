@@ -67,7 +67,7 @@ def send_prompt(prompt_text, retry_count=0):
             return None
 
 
-# 🆕 Naya function — prompt_generator.py ke liye
+
 def send_prompt_raw(system_prompt: str, user_message: str, retry_count=0):
     """
     Custom system prompt ke saath Groq API call karta hai.
