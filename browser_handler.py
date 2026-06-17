@@ -39,18 +39,18 @@ def send_prompt_to_claude(prompt: str) -> str:
         print(f"[*] Response ka wait kar raha hoon...")
         page.wait_for_timeout(6000)
 
-        # ✅ Naye selectors — multiple try karenge
+        
         response_text = ""
         
         selectors_to_try = [
-            # Claude ke possible response containers
+            
             ".font-claude-message",
             "[class*='prose']",
             "[class*='assistant']", 
             "div[class*='message']:last-child",
         ]
 
-        # Pehle streaming khatam hone do
+        
         prev_html = ""
         for _ in range(20):
             time.sleep(2)
@@ -60,12 +60,12 @@ def send_prompt_to_claude(prompt: str) -> str:
                 break
             prev_html = current_html
 
-        # Ab response nikalo
+        
         for selector in selectors_to_try:
             try:
                 elements = page.locator(selector).all()
                 if elements:
-                    # Last element lo — woh Claude ka response hoga
+                    
                     response_text = elements[-1].inner_text(timeout=5000)
                     if len(response_text) > 10:
                         print(f"[+] Selector kaam kiya: {selector}")
@@ -73,7 +73,7 @@ def send_prompt_to_claude(prompt: str) -> str:
             except:
                 continue
 
-        # Agar koi selector kaam nahi kiya
+        
         if not response_text:
             print("[!] Selector nahi mila — page ka text le raha hoon...")
             response_text = page.inner_text("body")[-2000:]  # Last 2000 chars
