@@ -1,6 +1,6 @@
 # report_generator.py
 # Version 3 feature — Professional HTML Report Generator
-# JSON results ko ek sundar HTML report mein convert karta hai
+
 
 import json
 import os
@@ -16,7 +16,7 @@ def generate_html_report(results, output_dir="results"):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{output_dir}/report_{timestamp}.html"
 
-    # Stats calculate karo
+    # Stats calculate 
     total    = len(results)
     critical = sum(1 for r in results if r["risk"]["level"] == "CRITICAL")
     high     = sum(1 for r in results if r["risk"]["level"] == "HIGH")
@@ -29,7 +29,7 @@ def generate_html_report(results, output_dir="results"):
     j_partial = sum(1 for r in results if r.get("judge", {}).get("verdict") == "PARTIAL")
     j_failure = sum(1 for r in results if r.get("judge", {}).get("verdict") == "FAILURE")
 
-    # OWASP category detect karna
+    # OWASP category detect 
     def get_owasp_category(prompt):
         prompt_lower = prompt.lower()
         if any(w in prompt_lower for w in ["ignore", "forget", "override", "disregard"]):
@@ -68,7 +68,7 @@ def generate_html_report(results, output_dir="results"):
             "ERROR":   "#95a5a6"
         }.get(verdict, "#95a5a6")
 
-    # Result rows banao
+    # Result rows 
     rows = ""
     for r in results:
         level   = r["risk"]["level"]
@@ -334,7 +334,7 @@ def generate_from_latest_json(results_dir="results"):
         print("Koi JSON results nahi mili results/ folder mein!")
         return
 
-    # Sabse latest file lo
+    
     latest = sorted(json_files)[-1]
     filepath = os.path.join(results_dir, latest)
 
