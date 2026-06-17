@@ -1,5 +1,5 @@
 # app.py — Flask Web Dashboard
-# Browser mein AI Prompt Injection Tool chalega!
+
 
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
@@ -81,7 +81,7 @@ def run_tests_background(prompts):
         test_state["current"] = index
         category = get_category(prompt)
 
-        # Frontend ko batao — test shuru hua
+        
         socketio.emit("test_progress", {
             "current": index,
             "total": len(prompts),
@@ -90,7 +90,7 @@ def run_tests_background(prompts):
             "status": "testing"
         })
 
-        # AI ko prompt bhejo
+        
         ai_response = send_prompt(prompt)
 
         if ai_response is None:
@@ -118,15 +118,15 @@ def run_tests_background(prompts):
 
         test_state["results"].append(result)
 
-        # Frontend ko result bhejo — real-time!
+        
         socketio.emit("test_result", result)
 
         time.sleep(4)
 
-    # Sab tests complete!
+    
     test_state["running"] = False
 
-    # Results save karo
+    
     os.makedirs("results", exist_ok=True)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"results/results_{timestamp}.json"
@@ -170,7 +170,7 @@ def start_tests():
     if not prompts:
         return jsonify({"error": "No prompts found!"}), 400
 
-    # Background thread mein tests chalao
+    
     thread = threading.Thread(
         target=run_tests_background,
         args=(prompts,)
