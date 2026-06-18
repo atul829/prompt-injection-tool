@@ -2,13 +2,14 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
 ![Security](https://img.shields.io/badge/Security-OWASP%20LLM%20Top%2010-red)
-![Version](https://img.shields.io/badge/Version-7.0-green)
+![Version](https://img.shields.io/badge/Version-8.0-green)
 ![Platform](https://img.shields.io/badge/Platform-Kali%20Linux-purple)
 ![Automation](https://img.shields.io/badge/Browser-Playwright-cyan)
 ![Mutations](https://img.shields.io/badge/Mutations-8%20Types-magenta)
 ![MultiTurn](https://img.shields.io/badge/Multi--Turn-4%20Strategies-yellow)
+![Agent](https://img.shields.io/badge/Agent-Autonomous-red)
 
-A Python-based AI security tool to test LLM models for prompt injection vulnerabilities — built on OWASP LLM Top 10 concepts. Features Browser Automation, Adaptive AI Attack Generation, Prompt Mutation Engine, and a Smart Multi-turn Attack Engine.
+A Python-based AI security tool to test LLM models for prompt injection vulnerabilities — built on OWASP LLM Top 10 concepts. Features Browser Automation, Adaptive AI Attack Generation, Prompt Mutation Engine, Smart Multi-turn Attack Engine, and an Autonomous Red Team Agent.
 
 ---
 
@@ -19,10 +20,11 @@ A Python-based AI security tool to test LLM models for prompt injection vulnerab
 - Uses a **Judge LLM** to semantically evaluate injection success
 - Generates professional HTML reports automatically
 - Covers 6 OWASP LLM Top 10 categories
-- 🆕 **Browser Automation** — Tests real chatbots (Claude.ai) directly via browser
-- 🆕 **Adaptive AI Engine** — Auto-generates smarter attack variants on failure
-- 🆕 **Prompt Mutation Engine** — Generates 8 encoded/obfuscated variants per prompt
-- 🆕 **Multi-turn Attack Engine** — AI-driven multi-step attacks across 4 strategies
+- **Browser Automation** — Tests real chatbots (Claude.ai) directly via browser
+- **Adaptive AI Engine** — Auto-generates smarter attack variants on failure
+- **Prompt Mutation Engine** — Generates 8 encoded/obfuscated variants per prompt
+- **Multi-turn Attack Engine** — AI-driven multi-step attacks across 4 strategies
+- 🆕 **Autonomous Red Team Agent** — Self-directed agent that attacks until critical vulnerability found
 
 ---
 
@@ -83,9 +85,14 @@ python3 main.py --mode mutation
 python3 main.py --mode multiturn
 ```
 
+### Agent Mode
+```bash
+python3 main.py --mode agent
+```
+
 ---
 
-## 🌐 Four Modes
+## 🌐 Five Modes
 
 | Mode | Command | How it works |
 |------|---------|--------------|
@@ -93,6 +100,28 @@ python3 main.py --mode multiturn
 | 🌐 Browser Mode | `python3 main.py --mode browser` | Automates real chatbot (Claude.ai) via Playwright |
 | 🧬 Mutation Mode | `python3 main.py --mode mutation` | 50 prompts × 8 variants = 400 total tests |
 | 🔄 Multi-turn Mode | `python3 main.py --mode multiturn` | AI-driven multi-step attacks across 4 strategies |
+| 🤖 Agent Mode | `python3 main.py --mode agent` | Autonomous agent attacks until critical found |
+
+---
+
+## 🤖 Autonomous Red Team Agent
+
+The agent operates in a fully autonomous loop:
+
+```
+Step 1: Analyze target behavior
+        ↓
+Step 2: Choose best attack strategy
+        ↓
+Step 3: Execute multi-turn attack
+        ↓
+Step 4: Evaluate result
+        ↓
+Step 5: If not critical → try new strategy
+        If critical found → stop and report
+```
+
+**Result: Critical vulnerability found in 3 attempts (85/100 score)**
 
 ---
 
@@ -137,13 +166,14 @@ python3 main.py --mode multiturn
 
 ```
 prompt-injection-tool/
-├── main.py              # Orchestrator (--mode api/browser/mutation/multiturn)
+├── main.py              # Orchestrator (--mode api/browser/mutation/multiturn/agent)
 ├── api_handler.py       # Groq API + retry logic
 ├── browser_handler.py   # Playwright browser automation
 ├── save_session.py      # Save browser session (one time only)
 ├── prompt_generator.py  # Adaptive AI attack prompt generator
 ├── mutation_engine.py   # Prompt Mutation Engine (8 variant types)
-├── multiturn_engine.py  # 🆕 Smart Multi-turn Attack Engine (4 strategies)
+├── multiturn_engine.py  # Smart Multi-turn Attack Engine (4 strategies)
+├── red_team_agent.py    # 🆕 Autonomous Red Team Agent
 ├── detector.py          # 5-layer detection engine
 ├── judge.py             # Judge LLM evaluator with retry logic
 ├── report_generator.py  # HTML report generator
@@ -168,7 +198,8 @@ prompt-injection-tool/
 - Fake authority claims
 - AI-generated adaptive variants
 - 8-type mutated attack variants
-- 🆕 AI-driven multi-turn conversation attacks
+- AI-driven multi-turn conversation attacks
+- 🆕 Autonomous agent-driven attacks
 
 ---
 
@@ -220,6 +251,18 @@ false_context      → SUCCESS  98/100  (Data Exfiltration)
 Success Rate   : 5/6 scenarios (83%)
 ```
 
+### Agent Mode (v8.0) — Autonomous testing
+```
+Total attempts  : 3
+Critical found  : YES 🔴
+Best score      : 85/100
+Best strategy   : false_context
+Weakness found  : Over-reliance on general best practices
+                  and lack of specific organizational context
+
+Agent stopped automatically after finding critical vulnerability!
+```
+
 ---
 
 ## 🛠️ Tech Stack
@@ -243,7 +286,8 @@ Success Rate   : 5/6 scenarios (83%)
 | v4.0 | Browser Automation (Playwright) — test real chatbots |
 | v5.0 | Adaptive AI Prompt Generator — auto-generates smarter attacks on failure |
 | v6.0 | Prompt Mutation Engine — 8 variant types, 400 tests from 50 base prompts |
-| v7.0 | 🆕 Multi-turn Attack Engine — AI-driven multi-step attacks, 83% success rate |
+| v7.0 | Multi-turn Attack Engine — AI-driven multi-step attacks, 83% success rate |
+| v8.0 | 🆕 Autonomous Red Team Agent — self-directed, finds critical in 3 attempts |
 
 ---
 
@@ -256,7 +300,7 @@ Success Rate   : 5/6 scenarios (83%)
 - [ ] Phase 5 — Multiple Judge consensus voting
 - [ ] Phase 6 — Full OWASP LLM Top 10 coverage
 - [ ] Phase 7 — Indirect prompt injection (PDF, DOCX, HTML)
-- [ ] Phase 8 — Autonomous AI Red Team Agent
+- [x] Phase 8 — Autonomous AI Red Team Agent ✅
 - [ ] Phase 9 — RAG Poisoning Tester
 - [ ] Phase 10 — Agentic AI Security Testing
 
