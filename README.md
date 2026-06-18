@@ -264,7 +264,7 @@ Success Rate   : 5/6 scenarios (83%)
 
 ## 👤 Author
 
-**Atul Kumar** — AI Security Researcher (Student)
+**Atul Kumar** — AI Security Researcher
 
 ---
 
