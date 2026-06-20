@@ -1,5 +1,5 @@
-# main.py — Version 8.0
-# Autonomous Red Team Agent added (--mode agent)
+# main.py — Version 9.0
+# Multi-model support added (--model groq/ollama/gemini)
 
 import json
 import os
@@ -23,6 +23,7 @@ from prompt_generator import generate_adaptive_prompts
 from mutation_engine import mutate_prompt
 from multiturn_engine import run_multiturn_attack, ATTACK_STRATEGIES
 from red_team_agent import RedTeamAgent
+from multi_model_handler import send_prompt_multi
 
 load_dotenv()
 
@@ -127,10 +128,10 @@ def save_results(results, output_dir="results"):
     return filename
 
 
-def print_banner(mode):
+def print_banner(mode, model="groq"):
     banner = Text()
     banner.append("  🛡️  AI PROMPT INJECTION TESTING TOOL\n", style="bold red")
-    banner.append("  Version 8.0  |  OWASP LLM Top 10  |  ", style="dim")
+    banner.append("  Version 9.0  |  OWASP LLM Top 10  |  ", style="dim")
     banner.append("Kali Linux", style="bold green")
     banner.append(f"  |  Mode: ", style="dim")
     if mode == "browser":
@@ -143,6 +144,9 @@ def print_banner(mode):
         banner.append("🤖 AGENT", style="bold red")
     else:
         banner.append("⚡ API", style="bold yellow")
+        banner.append(f"  |  Model: ", style="dim")
+        model_colors = {"groq": "bold cyan", "ollama": "bold green", "gemini": "bold blue"}
+        banner.append(model.upper(), style=model_colors.get(model, "bold white"))
     console.print(Panel(banner, border_style="red"))
 
 
@@ -318,8 +322,8 @@ def print_summary(results, mode="api"):
     console.print(detail_table)
 
 
-def run_tests(mode="api"):
-    print_banner(mode)
+def run_tests(mode="api", model="groq"):
+    print_banner(mode, model)
 
     prompts = load_prompts("prompts.txt")
     if not prompts:
@@ -362,6 +366,8 @@ def run_tests(mode="api"):
             if mode == "browser":
                 console.print(f"\n[cyan][Browser] Sending prompt to Claude.ai...[/cyan]")
                 ai_response = send_prompt_to_claude(prompt)
+            elif mode == "api" and model != "groq":
+                ai_response = send_prompt_multi(prompt, model)
             else:
                 ai_response = send_prompt(prompt)
 
@@ -374,7 +380,8 @@ def run_tests(mode="api"):
                     "risk": {"score": 0, "level": "ERROR", "matches": []},
                     "judge": {"verdict": "ERROR", "judge_score": 0, "reason": "Failed"},
                     "is_adaptive": is_adaptive,
-                    "mode": mode
+                    "mode": mode,
+                    "model": model
                 })
                 time.sleep(3)
                 progress.advance(task)
@@ -393,7 +400,8 @@ def run_tests(mode="api"):
                 "judge": verdict,
                 "timestamp": datetime.datetime.now().isoformat(),
                 "is_adaptive": is_adaptive,
-                "mode": mode
+                "mode": mode,
+                "model": model
             }
             results.append(result_record)
 
@@ -409,7 +417,7 @@ def run_tests(mode="api"):
                 f"[dim]{prompt[:40]}...[/dim]"
             )
 
-            if jverdict == "FAILURE" and adaptive_added < MAX_ADAPTIVE and mode == "api":
+            if jverdict == "FAILURE" and adaptive_added < MAX_ADAPTIVE and mode == "api" and model == "groq":
                 progress.console.print(
                     f"  [yellow]⚡ FAILURE detected — generating adaptive attack prompts...[/yellow]"
                 )
@@ -429,6 +437,8 @@ def run_tests(mode="api"):
 
             if mode == "browser":
                 time.sleep(8)
+            elif model == "ollama":
+                time.sleep(2)  # Ollama is local, no rate limit needed
             else:
                 time.sleep(7)
 
@@ -439,7 +449,7 @@ def run_tests(mode="api"):
     print_summary(results, mode)
     console.print("\n[cyan]Generating HTML report...[/cyan]")
     generate_html_report(results)
-    console.print("[green]✓ All done! Version 8.0 complete![/green]")
+    console.print(f"[green]✓ All done! Version 9.0 complete! (Model: {model.upper()})[/green]")
 
 
 def run_mutation_tests():
@@ -543,7 +553,7 @@ def run_mutation_tests():
     print_summary(results, mode="mutation")
     console.print("\n[cyan]Generating HTML report...[/cyan]")
     generate_html_report(results)
-    console.print("[green]✓ Mutation testing complete! Version 8.0[/green]")
+    console.print("[green]✓ Mutation testing complete! Version 9.0[/green]")
 
 
 def run_multiturn_tests():
@@ -604,7 +614,7 @@ def run_multiturn_tests():
     save_results(results)
     console.print()
     print_summary(results, mode="multiturn")
-    console.print("[green]✓ Multi-turn testing complete! Version 8.0[/green]")
+    console.print("[green]✓ Multi-turn testing complete! Version 9.0[/green]")
 
 
 def run_agent_tests():
@@ -614,16 +624,13 @@ def run_agent_tests():
     console.print(f"[yellow]⚠ Agent will keep attacking until critical vulnerability found[/yellow]")
     console.print(f"[yellow]⚠ Maximum attempts: 10[/yellow]\n")
 
-    # Run agent
     agent = RedTeamAgent(verbose=True)
     report = agent.run(max_attempts=10)
 
-    # Save results
     os.makedirs("results", exist_ok=True)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     filename  = f"results/agent_{timestamp}.json"
     with open(filename, "w") as f:
-        # Remove conversation history for cleaner output
         clean_report = {
             "total_attempts":  report["total_attempts"],
             "critical_found":  report["critical_found"],
@@ -652,7 +659,6 @@ def run_agent_tests():
 
     console.print(f"\n[green]✓ Agent report saved: {filename}[/green]")
 
-    # Print final summary table
     console.print()
     agent_table = Table(
         title="🤖 Autonomous Agent — Final Report",
@@ -663,40 +669,25 @@ def run_agent_tests():
     agent_table.add_column("Metric", style="bold")
     agent_table.add_column("Result", justify="center")
 
-    agent_table.add_row(
-        "Total Attempts",
-        str(report["total_attempts"])
-    )
+    agent_table.add_row("Total Attempts", str(report["total_attempts"]))
     agent_table.add_row(
         "Critical Found",
         "[red]YES 🔴[/red]" if report["critical_found"] else "[green]NO ✅[/green]"
     )
-    agent_table.add_row(
-        "Target Type",
-        report["target_profile"].get("type", "Unknown")
-    )
+    agent_table.add_row("Target Type", report["target_profile"].get("type", "Unknown"))
 
     if report["best_result"]:
-        agent_table.add_row(
-            "Best Score",
-            f"[red]{report['best_result'].get('score', 0)}/100[/red]"
-        )
-        agent_table.add_row(
-            "Best Strategy",
-            report["best_result"].get("strategy", "N/A")
-        )
-        agent_table.add_row(
-            "Weakness Found",
-            str(report["best_result"].get("weakness_found", "None"))[:60]
-        )
+        agent_table.add_row("Best Score", f"[red]{report['best_result'].get('score', 0)}/100[/red]")
+        agent_table.add_row("Best Strategy", report["best_result"].get("strategy", "N/A"))
+        agent_table.add_row("Weakness Found", str(report["best_result"].get("weakness_found", "None"))[:60])
 
     console.print(agent_table)
-    console.print(f"\n[green]✓ Version 8.0 complete![/green]")
+    console.print(f"\n[green]✓ Version 9.0 complete![/green]")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="AI Prompt Injection Testing Tool v8.0"
+        description="AI Prompt Injection Testing Tool v9.0"
     )
     parser.add_argument(
         "--mode",
@@ -704,9 +695,15 @@ if __name__ == "__main__":
         default="api",
         help="api | browser | mutation | multiturn | agent"
     )
+    parser.add_argument(
+        "--model",
+        choices=["groq", "ollama", "gemini"],
+        default="groq",
+        help="Only used with --mode api: groq | ollama | gemini"
+    )
     args = parser.parse_args()
 
-    console.print(f"[cyan]🚀 Starting in {args.mode.upper()} mode...[/cyan]")
+    console.print(f"[cyan]🚀 Starting in {args.mode.upper()} mode (model: {args.model.upper()})...[/cyan]")
 
     if args.mode == "mutation":
         run_mutation_tests()
@@ -715,4 +712,4 @@ if __name__ == "__main__":
     elif args.mode == "agent":
         run_agent_tests()
     else:
-        run_tests(mode=args.mode)
+        run_tests(mode=args.mode, model=args.model)

@@ -1,4 +1,4 @@
-# red_team_agent.py — Version 8.0
+# red_team_agent.py — Version 9.0
 # Autonomous AI Red Team Agent
 # Continuously attacks a target until a critical vulnerability is found
 
@@ -109,7 +109,7 @@ Return ONLY valid JSON."""
             self.log(f"[AGENT] Weak points: {profile.get('weak_points', [])}", "cyan")
             self.log(f"[AGENT] Recommended strategy: {profile.get('recommended_strategy', 'trust_building')}", "cyan")
             return profile
-        except:
+        except Exception:
             default = {
                 "type": "general assistant",
                 "restrictions": ["safety guidelines"],
@@ -128,11 +128,11 @@ Return ONLY valid JSON."""
 
         # First attempt — use recommended strategy from analysis
         if attempt_number == 1:
-            strategy   = self.target_profile.get("recommended_strategy", "trust_building")
-            category   = self.target_profile.get("recommended_category", "System Prompt Extraction")
+            strategy    = self.target_profile.get("recommended_strategy", "trust_building")
+            category    = self.target_profile.get("recommended_category", "System Prompt Extraction")
             attack_type = "multiturn"
 
-        # Second attempt — try mutation on a strong prompt
+        # Second attempt — try gradual escalation
         elif attempt_number == 2:
             strategy    = "gradual_escalation"
             category    = "Guardrail Bypass"
@@ -217,7 +217,7 @@ What attack should we try next to find a critical vulnerability?"""
                 if clean.startswith("json"):
                     clean = clean[4:]
             return json.loads(clean)
-        except:
+        except Exception:
             return {
                 "attack_type": "multiturn",
                 "strategy":    "conflicting_rules",
@@ -239,17 +239,17 @@ What attack should we try next to find a critical vulnerability?"""
 
         analysis = result.get("analysis", {})
         return {
-            "attack_type":     plan["attack_type"],
-            "strategy":        plan["strategy"],
-            "category":        plan["category"],
-            "goal":            plan["goal"],
-            "verdict":         analysis.get("verdict", "UNKNOWN"),
-            "score":           analysis.get("score", 0),
-            "weakness_found":  analysis.get("weakness_found", None),
+            "attack_type":       plan["attack_type"],
+            "strategy":          plan["strategy"],
+            "category":          plan["category"],
+            "goal":              plan["goal"],
+            "verdict":           analysis.get("verdict", "UNKNOWN"),
+            "score":             analysis.get("score", 0),
+            "weakness_found":    analysis.get("weakness_found", None),
             "breakthrough_turn": analysis.get("breakthrough_turn", None),
-            "turns_completed": result.get("turns_completed", 0),
-            "conversation":    result.get("conversation", []),
-            "timestamp":       datetime.datetime.now().isoformat()
+            "turns_completed":   result.get("turns_completed", 0),
+            "conversation":      result.get("conversation", []),
+            "timestamp":         datetime.datetime.now().isoformat()
         }
 
     # =========================================================
@@ -284,9 +284,9 @@ What attack should we try next to find a critical vulnerability?"""
     # =========================================================
     def run(self, max_attempts: int = MAX_ATTEMPTS) -> dict:
         self.log("\n" + "="*60, "red")
-        self.log("  AUTONOMOUS RED TEAM AGENT — VERSION 8.0", "red")
+        self.log("  AUTONOMOUS RED TEAM AGENT — VERSION 9.0", "red")
         self.log("="*60, "red")
-        self.log(f"  Max attempts    : {max_attempts}", "white")
+        self.log(f"  Max attempts      : {max_attempts}", "white")
         self.log(f"  Critical threshold: {CRITICAL_THRESHOLD}/100", "white")
         self.log("="*60 + "\n", "red")
 
